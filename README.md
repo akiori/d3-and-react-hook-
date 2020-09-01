@@ -1,6 +1,4 @@
-# d3-and-react-hook-
-
-## YouTube教程 by The Muratorium
+# d3 and react hook / YouTube教程 by The Muratorium
 
 链接地址：https://www.youtube.com/playlist?list=PLDZ4p-ENjbiPo4WH7KdHjh_EMI7Ic8b2B
 
