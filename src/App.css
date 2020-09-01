@@ -1,19 +1,21 @@
 svg {
   background: #eee;
   overflow: visible;
-  margin-bottom: 2rem;
   display: block;
+  width: 100%;
 }
 
 #root {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   height: 100vh;
+  padding: 0 50px;  /* 上下0 左右50 */
 }
 
 button {
-  margin-bottom: 5px;
+  border: 1px solid black;
   width: 100px;
+  margin: 0 auto 5px;
 }
