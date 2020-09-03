@@ -5,14 +5,23 @@ import { select, format, scaleQuantize, range, timeDays, timeMonths, timeWeek, t
 const [width, height, cellSize] = [960, 136, 17];
 
 function App() {
-
-
-    // const [dji, setDji] = useState([]);
+    const [dji, setDji] = useState([]);
 
     const divRef = useRef();
 
     useEffect(() => {
         const div = select(divRef.current);
+
+        csv("dji.csv").then((csv) => {
+            let data = nest()
+                .key((d) => d.Date)
+                .rollup((d) => (d[0].Close - d[0].Open) / d[0].Open)
+                .object(csv);
+
+            setDji(data);
+        });
+
+        if (dji.length === 0) return;
 
         const formatPercent = format(".1%");
 
@@ -33,47 +42,39 @@ function App() {
             ]);
 
         const svg = div.selectAll("svg")
-            .data(range(1990, 2011))
+            .data(range(2009, 2011))
             .enter()
             .append("svg")
             .attr("width", width)
             .attr("height", height)
-            .append("g")
-            .attr(
-                "transform",
-                "translate(" +
-                (width - cellSize * 53) / 2 +
-                "," +
-                (height - cellSize * 7 - 1) +
-                ")"
-            );
+                .append("g")
+                .attr("transform", "translate(" + (width - cellSize * 53) / 2 + "," + (height - cellSize * 7 - 1) + ")");
 
         svg.append("text")
-            .attr(
-                "transform",
-                "translate(-6," + cellSize * 3.5 + ")rotate(-90)"
-            )
+            .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
             .attr("font-family", "sans-serif")
             .attr("font-size", 10)
             .attr("text-anchor", "middle")
-            .text(function (d) {
-                return d;
-            });
+            .text(d => d);
 
         // 每一年小方格的group
-        const rect = svg
-            .append("g")
+        svg.append("g")
             .attr("fill", "none")
             .attr("stroke", "#ccc")
             .selectAll("rect")
-            .data(d => timeDays(new Date(d, 0, 1), new Date(d + 1, 0, 1))) // new Date(d, 0, 1)就是d年1月1日。主要是计算某一年所有日子构成的数组。
+            .data((d) => timeDays(new Date(d, 0, 1), new Date(d + 1, 0, 1))) // new Date(d, 0, 1)就是d年1月1日。主要是计算某一年所有日子构成的数组。
             .enter()
             .append("rect")
             .attr("width", cellSize)
             .attr("height", cellSize)
-            .attr("x", d => timeWeek.count(timeYear(d), d) * cellSize)
-            .attr("y", d => d.getDay() * cellSize) // 一周中的哪一天
-            .datum(timeFormat("%Y-%m-%d"));
+            .attr("x", (d) => timeWeek.count(timeYear(d), d) * cellSize)
+            .attr("y", (d) => d.getDay() * cellSize) // 一周中的哪一天
+            .datum(timeFormat("%Y-%m-%d"))
+            .on("click", (d) => document.getElementById("test").innerHTML = formatPercent(dji[d]))
+            .filter((d) => d in dji)
+            .attr("fill", (d) => color(dji[d]))
+            .append("title")
+            .text((d) => d + ": " + formatPercent(dji[d]));
         
         const pathMonth = (t0) => {
             let t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
@@ -96,25 +97,19 @@ function App() {
             .append("path")
             .attr("d", pathMonth);
         
-        csv("dji.csv", (error, csv) => {
-            if (error) throw error;
-
-            console.log(csv);
-
-            let data = nest()
-                .key(d => d.Date)
-                .rollup(d => (d[0].Close - d[0].Open) / d[0].Open)
-                .object(csv);
-
-            rect.filter(d => d in data)
-                .attr("fill", d => color(data[d]))
-                .append("title")
-                .text(d => d + ": " + formatPercent(data[d]))
-        })
-    }); // 注意这里，每次data变了，这里的一块代码就会运行
+        // rect.filter(d => d in dji)
+        //     .attr("fill", d => color(dji[d]))
+        //     .append("title")
+        //     .text(d => d + ": " + formatPercent(dji[d]))
+        
+        
+        
+    }, [dji]); // 注意这里，每次data变了，这里的一块代码就会运行
 
     return (
-        <div ref={divRef}></div>
+        <div ref={divRef}>
+            <p id="test">涨跌幅</p>
+        </div>
     );
 }
 
