@@ -7,12 +7,8 @@ const [width, height, cellSize] = [960, 136, 17];
 // 修改这里的dji数据，相当于只在componentDidMount里出现一次
 function App() {
     const [dji, setDji] = useState([]);
-
     const divRef = useRef();
     const div = select(divRef.current);
-
-
-    console.log(dji);
 
     useEffect(() => {
         csv("dji.csv").then((csv) => {
@@ -24,6 +20,8 @@ function App() {
             setDji(data);
         });
     }, [])
+
+    console.log(dji);
 
     const formatPercent = format(".1%");
 
